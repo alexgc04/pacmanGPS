@@ -3,6 +3,7 @@ import java.util.Random;
 
 public class Ghost {
     private static final int SIZE = 20;
+    private static final int BODY_OVERLAP = 1;
     private int x, y;
     private Direction direction;
     private final Color color;
@@ -25,7 +26,7 @@ public class Ghost {
         g.setColor(color);
         int arcHeight = SIZE / 2;
         g.fillArc(x, y, SIZE, SIZE, 0, 180);
-        g.fillRect(x, y + arcHeight - 1, SIZE, SIZE - arcHeight + 1);
+        g.fillRect(x, y + arcHeight - BODY_OVERLAP, SIZE, SIZE - arcHeight + BODY_OVERLAP);
         int legWidth = SIZE / 4;
         g.setColor(color.darker());
         g.fillRect(x, y + SIZE - legWidth, legWidth, legWidth);

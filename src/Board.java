@@ -168,7 +168,10 @@ public class Board extends JPanel implements ActionListener {
         }
         if (shield > 0) {
             g.setColor(Color.YELLOW);
-            g.drawString("Shield:" + (shield / (double) HALF_HEARTS_PER_HEART), startX + 50 + idx * HUD_LIVES_STEP, y);
+            int shieldHearts = shield / HALF_HEARTS_PER_HEART;
+            boolean halfShield = shield % HALF_HEARTS_PER_HEART != 0;
+            String shieldText = halfShield ? shieldHearts + ".5♥" : shieldHearts + "♥";
+            g.drawString("Shield:" + shieldText, startX + 50 + idx * HUD_LIVES_STEP, y);
         }
     }
 
@@ -192,6 +195,7 @@ public class Board extends JPanel implements ActionListener {
     }
 
     public static boolean isWallCollision(int x, int y, int size) {
+        // Corner-based collision detection for tile-sized entities
         return isWallAtPixel(x, y) || isWallAtPixel(x + size - 1, y) || isWallAtPixel(x, y + size - 1) || isWallAtPixel(x + size - 1, y + size - 1);
     }
 
@@ -222,7 +226,7 @@ public class Board extends JPanel implements ActionListener {
     }
 
     private boolean isPointCell(int col, int row) {
-        return row >= 0 && row < ROWS && col >= 0 && col < COLS && MAP_TEMPLATE[row].charAt(col) != WALL;
+        return row >= 0 && row < ROWS && col >= 0 && col < COLS && MAP[row][col] != WALL;
     }
 
     private Point toPosition(int col, int row) {
