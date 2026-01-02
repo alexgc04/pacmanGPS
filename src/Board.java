@@ -3,16 +3,21 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class Board extends JPanel implements ActionListener {
-    private static final int TILE_SIZE = 20;
-    private static final String[] MAP_LAYOUT = {
+    public static final int TILE_SIZE = 20;
+    private static final char WALL = '#';
+    private static final char DOT = '.';
+    private static final char HEART = 'H';
+    private static final char GOLD = 'G';
+    private static final char EMPTY = ' ';
+    private static final String[] MAP_TEMPLATE = {
         "####################",
-        "#..................#",
+        "#....H.......H....G#",
         "#.######..######...#",
         "#.######..######...#",
         "#..................#",
         "#..####...##...#####",
         "#..####...##...#####",
-        "#..................#",
+        "#..H..............H#",
         "#.######..##..######",
         "#..................#",
         "#...############...#",
@@ -20,14 +25,15 @@ public class Board extends JPanel implements ActionListener {
         "#.######..##..######",
         "#..................#",
         "#..####...##...#####",
-        "#..................#",
+        "#......H...........#",
         "#..####...##...#####",
         "#..................#",
-        "#..................#",
+        "#....H.........H...#",
         "####################"
     };
-    private static final int ROWS = MAP_LAYOUT.length;
-    private static final int COLS = MAP_LAYOUT[0].length();
+    private static final int ROWS = MAP_TEMPLATE.length;
+    private static final int COLS = MAP_TEMPLATE[0].length();
+    private static final char[][] MAP = new char[ROWS][COLS];
     private Timer timer;
     private Pacman pacman;
     private Ghost[] ghosts;
@@ -36,14 +42,21 @@ public class Board extends JPanel implements ActionListener {
     public Board() {
         setFocusable(true);
         setBackground(Color.BLACK);
+        initializeMap();
         pacman = new Pacman(180, 300);
         Point redSpawn = findNearestPointSpawn(new Point(180, 180));
         Point pinkSpawn = findNearestPointSpawn(new Point(60, 60));
-        Point cyanSpawn = findNearestPointSpawn(new Point(300, 60));
+        Point weakSpawnA = findNearestPointSpawn(new Point(300, 60));
+        Point weakSpawnB = findNearestPointSpawn(new Point(60, 300));
+        Point weakSpawnC = findNearestPointSpawn(new Point(300, 300));
+        Point extremeSpawn = findNearestPointSpawn(new Point(180, 60));
         ghosts = new Ghost[] {
-            new Ghost(redSpawn.x, redSpawn.y, Color.RED),
-            new Ghost(pinkSpawn.x, pinkSpawn.y, Color.PINK),
-            new Ghost(cyanSpawn.x, cyanSpawn.y, Color.CYAN)
+            new Ghost(weakSpawnA.x, weakSpawnA.y, GhostType.WEAK),
+            new Ghost(weakSpawnB.x, weakSpawnB.y, GhostType.WEAK),
+            new Ghost(weakSpawnC.x, weakSpawnC.y, GhostType.WEAK),
+            new Ghost(pinkSpawn.x, pinkSpawn.y, GhostType.INTERMEDIATE),
+            new Ghost(redSpawn.x, redSpawn.y, GhostType.DIFFICULT),
+            new Ghost(extremeSpawn.x, extremeSpawn.y, GhostType.EXTREME)
         };
         timer = new Timer(40, this);
         timer.start();
@@ -63,30 +76,124 @@ public class Board extends JPanel implements ActionListener {
     private void drawBoard(Graphics g) {
         for (int row = 0; row < ROWS; row++) {
             for (int col = 0; col < COLS; col++) {
-                char cell = MAP_LAYOUT[row].charAt(col);
+                char cell = MAP[row][col];
                 int x = col * TILE_SIZE;
                 int y = row * TILE_SIZE;
-                if (cell == '#') {
+                if (cell == WALL) {
                     g.setColor(Color.BLUE);
                     g.fillRect(x, y, TILE_SIZE, TILE_SIZE);
-                } else if (cell == '.') {
+                } else if (cell == DOT) {
                     g.setColor(Color.WHITE);
                     g.fillOval(x + TILE_SIZE / 2 - 3, y + TILE_SIZE / 2 - 3, 6, 6);
+                } else if (cell == HEART) {
+                    g.setColor(Color.PINK);
+                    g.fillOval(x + 3, y + 5, 7, 7);
+                    g.fillOval(x + 10, y + 5, 7, 7);
+                    g.setColor(Color.RED);
+                    g.fillPolygon(new int[] {x + 3, x + TILE_SIZE / 2, x + TILE_SIZE - 3}, new int[] {y + 10, y + TILE_SIZE - 4, y + 10}, 3);
+                } else if (cell == GOLD) {
+                    g.setColor(Color.ORANGE);
+                    g.fillOval(x + 4, y + 4, TILE_SIZE - 8, TILE_SIZE - 8);
+                    g.setColor(Color.YELLOW);
+                    g.drawOval(x + 4, y + 4, TILE_SIZE - 8, TILE_SIZE - 8);
                 }
             }
         }
         g.setColor(Color.YELLOW);
         g.drawString("Score: " + pacman.getScore(), 10, 410);
+        drawLives(g);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         pacman.move();
+        collectItems();
         for (Ghost ghost : ghosts) {
             ghost.move();
+            if (intersects(pacman.getBounds(), ghost.getBounds())) {
+                pacman.applyDamage(ghost.getDamageHalfHearts());
+            }
         }
-        // Aquí puedes agregar colisiones y lógica de puntos
+        if (pacman.isDead()) {
+            timer.stop();
+        }
         repaint();
+    }
+
+    private void initializeMap() {
+        for (int r = 0; r < ROWS; r++) {
+            MAP[r] = MAP_TEMPLATE[r].toCharArray();
+        }
+    }
+
+    private void collectItems() {
+        Point center = pacman.getCenter();
+        int col = center.x / TILE_SIZE;
+        int row = center.y / TILE_SIZE;
+        if (!isInside(row, col)) {
+            return;
+        }
+        char cell = MAP[row][col];
+        if (cell == DOT) {
+            MAP[row][col] = EMPTY;
+            pacman.addScore(10);
+        } else if (cell == HEART) {
+            MAP[row][col] = EMPTY;
+            pacman.heal(2);
+        } else if (cell == GOLD) {
+            MAP[row][col] = EMPTY;
+            pacman.applyGoldHeart();
+        }
+    }
+
+    private void drawLives(Graphics g) {
+        int startX = 100;
+        int y = 410;
+        g.setColor(Color.WHITE);
+        g.drawString("Lives:", startX, y);
+        int hearts = pacman.getHalfHearts() / 2;
+        int half = pacman.getHalfHearts() % 2;
+        int shield = pacman.getShieldHalfHearts();
+        int idx = 0;
+        for (int i = 0; i < hearts; i++) {
+            drawHeartIcon(g, startX + 50 + idx * 15, y - 12, Color.RED);
+            idx++;
+        }
+        if (half > 0) {
+            drawHalfHeartIcon(g, startX + 50 + idx * 15, y - 12, Color.RED);
+            idx++;
+        }
+        if (shield > 0) {
+            g.setColor(Color.YELLOW);
+            g.drawString("Shield:" + (shield / 2.0), startX + 50 + idx * 15, y);
+        }
+    }
+
+    private void drawHeartIcon(Graphics g, int x, int y, Color color) {
+        g.setColor(color);
+        g.fillOval(x, y, 8, 8);
+        g.fillOval(x + 6, y, 8, 8);
+        g.fillPolygon(new int[] {x, x + 7, x + 14}, new int[] {y + 5, y + 14, y + 5}, 3);
+    }
+
+    private void drawHalfHeartIcon(Graphics g, int x, int y, Color color) {
+        g.setColor(color);
+        g.fillOval(x, y, 8, 8);
+        g.fillPolygon(new int[] {x, x + 4, x + 8}, new int[] {y + 5, y + 14, y + 5}, 3);
+    }
+
+    public static boolean isWallAtPixel(int x, int y) {
+        int col = x / TILE_SIZE;
+        int row = y / TILE_SIZE;
+        return !isInside(row, col) || MAP[row][col] == WALL;
+    }
+
+    public static boolean isWallCollision(int x, int y, int size) {
+        return isWallAtPixel(x, y) || isWallAtPixel(x + size - 1, y) || isWallAtPixel(x, y + size - 1) || isWallAtPixel(x + size - 1, y + size - 1);
+    }
+
+    private static boolean isInside(int row, int col) {
+        return row >= 0 && row < ROWS && col >= 0 && col < COLS;
     }
 
     private Point findNearestPointSpawn(Point preferredPosition) {
@@ -112,11 +219,15 @@ public class Board extends JPanel implements ActionListener {
     }
 
     private boolean isPointCell(int col, int row) {
-        return row >= 0 && row < ROWS && col >= 0 && col < COLS && MAP_LAYOUT[row].charAt(col) == '.';
+        return row >= 0 && row < ROWS && col >= 0 && col < COLS && MAP_TEMPLATE[row].charAt(col) != WALL;
     }
 
     private Point toPosition(int col, int row) {
         return new Point(col * TILE_SIZE, row * TILE_SIZE);
+    }
+
+    private boolean intersects(Rectangle a, Rectangle b) {
+        return a.intersects(b);
     }
 
     private class PacmanKeyAdapter extends KeyAdapter {
