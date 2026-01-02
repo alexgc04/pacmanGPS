@@ -9,6 +9,9 @@ public class Board extends JPanel implements ActionListener {
     private static final char HEART = 'H';
     private static final char GOLD = 'G';
     private static final char EMPTY = ' ';
+    private static final int HALF_HEARTS_PER_HEART = 2;
+    private static final int HUD_LIVES_START_X = 100;
+    private static final int HUD_LIVES_STEP = 15;
     private static final String[] MAP_TEMPLATE = {
         "####################",
         "#....H.......H....G#",
@@ -147,25 +150,25 @@ public class Board extends JPanel implements ActionListener {
     }
 
     private void drawLives(Graphics g) {
-        int startX = 100;
+        int startX = HUD_LIVES_START_X;
         int y = 410;
         g.setColor(Color.WHITE);
         g.drawString("Lives:", startX, y);
-        int hearts = pacman.getHalfHearts() / 2;
-        int half = pacman.getHalfHearts() % 2;
+        int hearts = pacman.getHalfHearts() / HALF_HEARTS_PER_HEART;
+        int half = pacman.getHalfHearts() % HALF_HEARTS_PER_HEART;
         int shield = pacman.getShieldHalfHearts();
         int idx = 0;
         for (int i = 0; i < hearts; i++) {
-            drawHeartIcon(g, startX + 50 + idx * 15, y - 12, Color.RED);
+            drawHeartIcon(g, startX + 50 + idx * HUD_LIVES_STEP, y - 12, Color.RED);
             idx++;
         }
         if (half > 0) {
-            drawHalfHeartIcon(g, startX + 50 + idx * 15, y - 12, Color.RED);
+            drawHalfHeartIcon(g, startX + 50 + idx * HUD_LIVES_STEP, y - 12, Color.RED);
             idx++;
         }
         if (shield > 0) {
             g.setColor(Color.YELLOW);
-            g.drawString("Shield:" + (shield / 2.0), startX + 50 + idx * 15, y);
+            g.drawString("Shield:" + (shield / (double) HALF_HEARTS_PER_HEART), startX + 50 + idx * HUD_LIVES_STEP, y);
         }
     }
 

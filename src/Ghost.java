@@ -2,6 +2,7 @@ import java.awt.*;
 import java.util.Random;
 
 public class Ghost {
+    private static final int SIZE = 20;
     private int x, y;
     private Direction direction;
     private final Color color;
@@ -22,16 +23,15 @@ public class Ghost {
 
     public void draw(Graphics g) {
         g.setColor(color);
-        int size = 20;
-        int arcHeight = size / 2;
-        g.fillArc(x, y, size, size, 0, 180);
-        g.fillRect(x, y + arcHeight - 1, size, size - arcHeight + 1);
-        int legWidth = size / 4;
+        int arcHeight = SIZE / 2;
+        g.fillArc(x, y, SIZE, SIZE, 0, 180);
+        g.fillRect(x, y + arcHeight - 1, SIZE, SIZE - arcHeight + 1);
+        int legWidth = SIZE / 4;
         g.setColor(color.darker());
-        g.fillRect(x, y + size - legWidth, legWidth, legWidth);
-        g.fillRect(x + legWidth, y + size - legWidth, legWidth, legWidth);
-        g.fillRect(x + legWidth * 2, y + size - legWidth, legWidth, legWidth);
-        g.fillRect(x + legWidth * 3, y + size - legWidth, legWidth, legWidth);
+        g.fillRect(x, y + SIZE - legWidth, legWidth, legWidth);
+        g.fillRect(x + legWidth, y + SIZE - legWidth, legWidth, legWidth);
+        g.fillRect(x + legWidth * 2, y + SIZE - legWidth, legWidth, legWidth);
+        g.fillRect(x + legWidth * 3, y + SIZE - legWidth, legWidth, legWidth);
         g.setColor(Color.WHITE);
         g.fillOval(x + 4, y + 6, 6, 6);
         g.fillOval(x + 12, y + 6, 6, 6);
@@ -52,7 +52,7 @@ public class Ghost {
             case UP: y -= speed; break;
             case DOWN: y += speed; break;
         }
-        if (Board.isWallCollision(x, y, 20)) {
+        if (Board.isWallCollision(x, y, SIZE)) {
             x = oldX;
             y = oldY;
             direction = Direction.values()[random.nextInt(4)];
@@ -60,7 +60,7 @@ public class Ghost {
     }
 
     public Rectangle getBounds() {
-        return new Rectangle(x, y, 20, 20);
+        return new Rectangle(x, y, SIZE, SIZE);
     }
 
     public int getDamageHalfHearts() {

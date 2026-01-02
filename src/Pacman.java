@@ -5,10 +5,12 @@ public class Pacman {
     private int x, y;
     private Direction direction = Direction.LEFT;
     private int score = 0;
-    private int halfHearts = 10;
+    private int halfHearts = MAX_HALF_HEARTS;
     private int shieldHalfHearts = 0;
     private static final int SIZE = 20;
     private static final int STEP = 4;
+    private static final int MAX_HALF_HEARTS = 10;
+    private static final int GOLD_SHIELD_HALF_HEARTS = 4;
 
     public Pacman(int x, int y) {
         this.x = x;
@@ -55,14 +57,14 @@ public class Pacman {
     }
 
     public void heal(int halfHeartsAmount) {
-        halfHearts = Math.min(10, halfHearts + halfHeartsAmount);
+        halfHearts = Math.min(MAX_HALF_HEARTS, halfHearts + halfHeartsAmount);
     }
 
     public void applyGoldHeart() {
-        if (halfHearts < 10) {
-            halfHearts = 10;
+        if (halfHearts < MAX_HALF_HEARTS) {
+            halfHearts = MAX_HALF_HEARTS;
         } else {
-            shieldHalfHearts = 4;
+            shieldHalfHearts = GOLD_SHIELD_HALF_HEARTS;
         }
     }
 
