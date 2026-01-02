@@ -111,7 +111,7 @@ public class Board extends JPanel implements ActionListener {
     
     private void initLevel() {
         // Inicializar Pacman en posición segura
-        pacman = new Pacman(180, 300, this);
+        pacman = new Pacman(180, 320, this);
         
         // Inicializar fantasmas
         ghosts = new Ghost[] {
