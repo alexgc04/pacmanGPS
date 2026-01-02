@@ -25,10 +25,12 @@ public class Pacman {
     public void move() {
         switch (direction) {
             case LEFT:
-                if (!Board.isWallCollision(x - STEP, y, SIZE)) x -= STEP;
+                int newLeftX = Board.wrapXIfAllowed(x - STEP, y, SIZE);
+                if (!Board.isWallCollision(newLeftX, y, SIZE)) x = newLeftX;
                 break;
             case RIGHT:
-                if (!Board.isWallCollision(x + STEP, y, SIZE)) x += STEP;
+                int newRightX = Board.wrapXIfAllowed(x + STEP, y, SIZE);
+                if (!Board.isWallCollision(newRightX, y, SIZE)) x = newRightX;
                 break;
             case UP:
                 if (!Board.isWallCollision(x, y - STEP, SIZE)) y -= STEP;
@@ -98,5 +100,9 @@ public class Pacman {
 
     public int getShieldHalfHearts() {
         return shieldHalfHearts;
+    }
+
+    public boolean isAtMaxHealth() {
+        return halfHearts >= MAX_HALF_HEARTS;
     }
 }

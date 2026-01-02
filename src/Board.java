@@ -14,7 +14,7 @@ public class Board extends JPanel implements ActionListener {
     private static final int HUD_LIVES_STEP = 15;
     private static final String[] MAP_TEMPLATE = {
         "####################",
-        "#....H.......H....G#",
+        "#....H.......H.....#",
         "#.######..######...#",
         "#.######..######...#",
         "#..................#",
@@ -22,7 +22,7 @@ public class Board extends JPanel implements ActionListener {
         "#..####...##...#####",
         "#..H..............H#",
         "#.######..##..######",
-        "#..................#",
+        "....................",
         "#...############...#",
         "#..................#",
         "#.######..##..######",
@@ -36,6 +36,7 @@ public class Board extends JPanel implements ActionListener {
     };
     private static final int ROWS = MAP_TEMPLATE.length;
     private static final int COLS = MAP_TEMPLATE[0].length();
+    private static final int BOARD_WIDTH = COLS * TILE_SIZE;
     private static final char[][] MAP = new char[ROWS][COLS];
     private Timer timer;
     private Pacman pacman;
@@ -47,6 +48,7 @@ public class Board extends JPanel implements ActionListener {
         setBackground(Color.BLACK);
         initializeMap();
         pacman = new Pacman(180, 300);
+        ensureGoldSpawnIfEligible();
         Point redSpawn = findNearestPointSpawn(new Point(180, 180));
         Point pinkSpawn = findNearestPointSpawn(new Point(60, 60));
         Point weakSpawnA = findNearestPointSpawn(new Point(300, 60));
@@ -111,6 +113,7 @@ public class Board extends JPanel implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         pacman.move();
         collectItems();
+        ensureGoldSpawnIfEligible();
         for (Ghost ghost : ghosts) {
             ghost.move();
             if (intersects(pacman.getBounds(), ghost.getBounds())) {
@@ -141,12 +144,16 @@ public class Board extends JPanel implements ActionListener {
             MAP[row][col] = EMPTY;
             pacman.addScore(10);
         } else if (cell == HEART) {
-            MAP[row][col] = EMPTY;
-            pacman.heal(2);
+            if (!pacman.isAtMaxHealth()) {
+                MAP[row][col] = EMPTY;
+                pacman.heal(2);
+            }
+            // Hearts remain when at max; shield spawn handled below
         } else if (cell == GOLD) {
             MAP[row][col] = EMPTY;
             pacman.applyGoldHeart();
         }
+        ensureGoldSpawnIfEligible();
     }
 
     private void drawLives(Graphics g) {
@@ -235,6 +242,52 @@ public class Board extends JPanel implements ActionListener {
 
     private boolean intersects(Rectangle a, Rectangle b) {
         return a.intersects(b);
+    }
+
+    private void ensureGoldSpawnIfEligible() {
+        if (!pacman.isAtMaxHealth() || pacman.getShieldHalfHearts() > 0 || goldExists()) {
+            return;
+        }
+        for (int row = 0; row < ROWS; row++) {
+            for (int col = 0; col < COLS; col++) {
+                if (MAP[row][col] == HEART) {
+                    MAP[row][col] = GOLD;
+                    return;
+                }
+            }
+        }
+    }
+
+    private boolean goldExists() {
+        for (int row = 0; row < ROWS; row++) {
+            for (int col = 0; col < COLS; col++) {
+                if (MAP[row][col] == GOLD) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public static int wrapXIfAllowed(int x, int y, int size) {
+        int rowTop = y / TILE_SIZE;
+        int rowBottom = (y + size - 1) / TILE_SIZE;
+        if (rowTop < 0 || rowBottom >= ROWS) {
+            return x;
+        }
+        if (canWrapRow(rowTop) && canWrapRow(rowBottom)) {
+            if (x + size <= 0) {
+                return BOARD_WIDTH - size;
+            }
+            if (x >= BOARD_WIDTH) {
+                return 0;
+            }
+        }
+        return x;
+    }
+
+    private static boolean canWrapRow(int row) {
+        return MAP[row][0] != WALL && MAP[row][COLS - 1] != WALL;
     }
 
     private class PacmanKeyAdapter extends KeyAdapter {

@@ -47,16 +47,22 @@ public class Ghost {
         }
         int oldX = x;
         int oldY = y;
+        int newX = x;
+        int newY = y;
         switch (direction) {
-            case LEFT: x -= speed; break;
-            case RIGHT: x += speed; break;
-            case UP: y -= speed; break;
-            case DOWN: y += speed; break;
+            case LEFT: newX -= speed; break;
+            case RIGHT: newX += speed; break;
+            case UP: newY -= speed; break;
+            case DOWN: newY += speed; break;
         }
-        if (Board.isWallCollision(x, y, SIZE)) {
+        newX = Board.wrapXIfAllowed(newX, newY, SIZE);
+        if (Board.isWallCollision(newX, newY, SIZE)) {
             x = oldX;
             y = oldY;
             direction = Direction.values()[random.nextInt(4)];
+        } else {
+            x = newX;
+            y = newY;
         }
     }
 
