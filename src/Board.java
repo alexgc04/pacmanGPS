@@ -12,6 +12,12 @@ public class Board extends JPanel implements ActionListener {
     private static final int BOARD_WIDTH = 20;
     private static final int BOARD_HEIGHT = 20;
     
+    // Constantes para el juego
+    private static final int SPRITE_SIZE = 20;
+    private static final int POINT_SIZE = 6;
+    private static final int POINT_OFFSET = 7;
+    private static final int POINT_VALUE = 10;
+    
     // Nivel actual (0, 1, o 2 para los 3 niveles)
     private int currentLevel = 0;
     
@@ -157,7 +163,7 @@ public class Board extends JPanel implements ActionListener {
         for (int i = 0; i < BOARD_HEIGHT; i++) {
             for (int j = 0; j < BOARD_WIDTH; j++) {
                 if (points[i][j]) {
-                    g.fillOval(j * BLOCK_SIZE + 7, i * BLOCK_SIZE + 7, 6, 6);
+                    g.fillOval(j * BLOCK_SIZE + POINT_OFFSET, i * BLOCK_SIZE + POINT_OFFSET, POINT_SIZE, POINT_SIZE);
                 }
             }
         }
@@ -190,7 +196,7 @@ public class Board extends JPanel implements ActionListener {
             pacmanCol >= 0 && pacmanCol < BOARD_WIDTH) {
             if (points[pacmanRow][pacmanCol]) {
                 points[pacmanRow][pacmanCol] = false;
-                pacman.addScore(10);
+                pacman.addScore(POINT_VALUE);
                 pointsEaten++;
                 
                 // Verificar si se comieron todos los puntos

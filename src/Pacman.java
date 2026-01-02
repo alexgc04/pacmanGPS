@@ -6,6 +6,8 @@ public class Pacman {
     private Direction direction = Direction.LEFT;
     private int score = 0;
     private Board board;
+    
+    private static final int SPRITE_SIZE = 20;
 
     public Pacman(int x, int y, Board board) {
         this.x = x;
@@ -30,8 +32,8 @@ public class Pacman {
         }
         
         // Verificar colisión con paredes antes de mover
-        if (!board.isWall(newX, newY) && !board.isWall(newX + 19, newY) &&
-            !board.isWall(newX, newY + 19) && !board.isWall(newX + 19, newY + 19)) {
+        if (!board.isWall(newX, newY) && !board.isWall(newX + SPRITE_SIZE - 1, newY) &&
+            !board.isWall(newX, newY + SPRITE_SIZE - 1) && !board.isWall(newX + SPRITE_SIZE - 1, newY + SPRITE_SIZE - 1)) {
             x = newX;
             y = newY;
         }
