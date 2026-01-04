@@ -540,31 +540,44 @@ class BoardTest {
         mapField.setAccessible(true);
         char[][] map = (char[][]) mapField.get(null);
         
-        // Get pacman via reflection
-        Field pacmanField = Board.class.getDeclaredField("pacman");
-        pacmanField.setAccessible(true);
-        Pacman pacman = (Pacman) pacmanField.get(board);
-        
-        // Replace all hearts and golds with empty space to trigger the edge case
+        // Save original map state
+        char[][] originalMap = new char[map.length][];
         for (int r = 0; r < map.length; r++) {
-            for (int c = 0; c < map[r].length; c++) {
-                if (map[r][c] == 'H' || map[r][c] == 'G') {
-                    map[r][c] = ' ';
-                }
-            }
+            originalMap[r] = map[r].clone();
         }
         
-        // Ensure pacman is at max health with no shield (conditions for gold spawn)
-        // pacman starts at max health
-        assertTrue(pacman.isAtMaxHealth());
-        assertEquals(0, pacman.getShieldHalfHearts());
-        
-        // Trigger actionPerformed which calls ensureGoldSpawnIfEligible
-        ActionEvent event = new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "test");
-        assertDoesNotThrow(() -> board.actionPerformed(event));
-        
-        // The method should complete without finding hearts to convert
-        // This covers line 261 (implicit return)
+        try {
+            // Get pacman via reflection
+            Field pacmanField = Board.class.getDeclaredField("pacman");
+            pacmanField.setAccessible(true);
+            Pacman pacman = (Pacman) pacmanField.get(board);
+            
+            // Replace all hearts and golds with empty space to trigger the edge case
+            for (int r = 0; r < map.length; r++) {
+                for (int c = 0; c < map[r].length; c++) {
+                    if (map[r][c] == 'H' || map[r][c] == 'G') {
+                        map[r][c] = ' ';
+                    }
+                }
+            }
+            
+            // Ensure pacman is at max health with no shield (conditions for gold spawn)
+            // pacman starts at max health
+            assertTrue(pacman.isAtMaxHealth());
+            assertEquals(0, pacman.getShieldHalfHearts());
+            
+            // Trigger actionPerformed which calls ensureGoldSpawnIfEligible
+            ActionEvent event = new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "test");
+            assertDoesNotThrow(() -> board.actionPerformed(event));
+            
+            // The method should complete without finding hearts to convert
+            // This covers line 261 (implicit return)
+        } finally {
+            // Restore original map
+            for (int r = 0; r < map.length; r++) {
+                map[r] = originalMap[r];
+            }
+        }
     }
 
     @Test

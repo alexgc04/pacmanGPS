@@ -43,7 +43,7 @@ public class Board extends JPanel implements ActionListener {
     private Timer timer;
     private Pacman pacman;
     private Ghost[] ghosts;
-    // Aquí puedes definir el mapa y la lógica de puntos
+    // Map and score logic can be defined here
 
     public Board() {
         setFocusable(true);
