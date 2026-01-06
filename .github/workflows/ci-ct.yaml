@@ -29,7 +29,7 @@ jobs:
         run: mvn clean install -DskipTests
 
       - name: Run tests
-        run: xvfb-run --auto-servernum mvn test
+        run: mvn test
 
       - name: Generate JaCoCo coverage report
         run: mvn jacoco:report
