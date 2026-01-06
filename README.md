@@ -95,7 +95,7 @@ Este proyecto utiliza GitHub Actions para CI/CT (Integración Continua / Prueba 
 
 ## Autor
 
-Proyecto desarrollado por alexgc04.
+Proyecto desarrollado por [paberlo].
 
 ---
 
