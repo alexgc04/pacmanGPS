@@ -26,35 +26,13 @@ jobs:
           cache: maven
 
       - name: Install dependencies and build
-        run: |
-          # Retry Maven build up to 3 times if it fails
-          for i in 1 2 3; do
-            mvn clean install -DskipTests && break || {
-              if [ $i -eq 3 ]; then
-                echo "Build failed after 3 attempts"
-                exit 1
-              fi
-              echo "Build attempt $i failed, retrying in 10 seconds..."
-              sleep 10
-            }
-          done
+        run: mvn clean install -DskipTests
 
       - name: Run tests
-        run: xvfb-run --auto-servernum mvn test
+        run: mvn test
 
       - name: Generate JaCoCo coverage report
-        run: |
-          # Generate coverage report with retry logic
-          for i in 1 2 3; do
-            mvn jacoco:report && break || {
-              if [ $i -eq 3 ]; then
-                echo "Coverage report generation failed after 3 attempts"
-                exit 1
-              fi
-              echo "Coverage report attempt $i failed, retrying in 5 seconds..."
-              sleep 5
-            }
-          done
+        run: mvn jacoco:report
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
