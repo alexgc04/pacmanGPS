@@ -38,7 +38,9 @@ public class Board extends JPanel implements ActionListener {
     };
     private static final int ROWS = MAP_TEMPLATE.length;
     private static final int COLS = MAP_TEMPLATE[0].length();
-    private static final int HUD_TEXT_Y = ROWS * TILE_SIZE - 5;
+    private static final int HUD_BASELINE_OFFSET_PIXELS = 5; // lift score text slightly above the last tile row
+    private static final int HUD_MIN_Y = 15; // minimum padding from the top when the panel is very small
+    private static final int HUD_BOTTOM_MARGIN = 10; // keep HUD from sticking to the bottom edge when clamping
     private static final int BOARD_WIDTH = COLS * TILE_SIZE;
     private static final char[][] MAP = new char[ROWS][COLS];
     private Timer timer;
@@ -107,7 +109,8 @@ public class Board extends JPanel implements ActionListener {
                 }
             }
         }
-        int hudY = Math.max(15, Math.min(HUD_TEXT_Y, getHeight() - 10));
+        // Clamp HUD position to the current panel height so score/lives stay visible after resizing
+        int hudY = calculateHudY(getHeight());
         g.setColor(Color.YELLOW);
         g.drawString("Score: " + pacman.getScore(), 10, hudY);
         drawLives(g, hudY);
@@ -292,6 +295,46 @@ public class Board extends JPanel implements ActionListener {
 
     private static boolean canWrapRow(int row) {
         return MAP[row][0] != WALL && MAP[row][COLS - 1] != WALL;
+    }
+
+    /**
+     * Computes the Y coordinate for the HUD text/icons, clamping it so it remains visible inside the given panel height.
+     * @param panelHeight current panel height in pixels
+     * @return the clamped HUD Y coordinate; if the panel is smaller than the margins, the value is capped to the remaining visible space
+     */
+    static int calculateHudY(int panelHeight) {
+        int availableSpace = Math.max(0, panelHeight - HUD_BOTTOM_MARGIN);
+        int lowerBound = Math.min(HUD_MIN_Y, availableSpace);
+        int clampedTarget = Math.min(getHudTargetY(), availableSpace);
+        return Math.max(lowerBound, clampedTarget);
+    }
+
+    /**
+     * Preferred HUD baseline position based on the map height.
+     * @return target HUD Y coordinate derived from map height and baseline offset
+     */
+    static int getHudTargetY() {
+        return getMapHeight() - HUD_BASELINE_OFFSET_PIXELS;
+    }
+
+    static int getHudBottomMargin() {
+        return HUD_BOTTOM_MARGIN;
+    }
+
+    /**
+     * Returns the map height in pixels.
+     * @return map height based on template rows and tile size
+     */
+    static int getMapHeight() {
+        return ROWS * TILE_SIZE;
+    }
+
+    /**
+     * Returns the map width in pixels.
+     * @return map width based on template columns and tile size
+     */
+    static int getMapWidth() {
+        return COLS * TILE_SIZE;
     }
 
     private class PacmanKeyAdapter extends KeyAdapter {

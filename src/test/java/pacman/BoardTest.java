@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class BoardTest {
 
     private Board board;
+    private static final int SMALL_PANEL_HEIGHT_TEST = 20;
 
     @BeforeEach
     void setUp() {
@@ -175,16 +176,17 @@ class BoardTest {
 
     @Test
     void testHudTextDrawnWithinBoardArea() throws Exception {
-        Field hudYField = Board.class.getDeclaredField("HUD_TEXT_Y");
-        hudYField.setAccessible(true);
-        int hudY = hudYField.getInt(null);
+        int boardHeight = Board.getMapHeight();
+        int boardWidth = Board.getMapWidth();
+        board.setSize(boardWidth, boardHeight);
 
-        Field mapField = Board.class.getDeclaredField("MAP");
-        mapField.setAccessible(true);
-        char[][] map = (char[][]) mapField.get(null);
+        int computedHudY = Board.calculateHudY(board.getHeight());
+        assertTrue(computedHudY >= 0, "HUD Y should not be negative");
+        assertTrue(computedHudY <= board.getHeight() - Board.getHudBottomMargin(), "HUD Y should respect the bottom margin");
 
-        int boardHeight = map.length * Board.TILE_SIZE;
-        assertTrue(hudY < boardHeight, "HUD text should render inside the board height");
+        int compressedHudY = Board.calculateHudY(SMALL_PANEL_HEIGHT_TEST); // Simulate a very small panel height
+        assertTrue(compressedHudY >= 0, "HUD Y should remain visible even on small panels");
+        assertTrue(compressedHudY <= Math.max(0, SMALL_PANEL_HEIGHT_TEST - Board.getHudBottomMargin()), "HUD Y should clamp within the available space");
     }
 
     @Test
