@@ -12,7 +12,7 @@ Juego básico de Pac-Man desarrollado en Java utilizando Swing para la interfaz 
 
 - 🎮 **Laberinto clásico**: Un tablero donde Pac-Man y los fantasmas se mueven libremente.
 - 🕹️ **Control del jugador**: Movimiento de Pac-Man controlado por el usuario mediante las teclas de flecha.
-- 👻 **Fantasmas inteligentes**: Cuatro tipos de fantasmas (Blinky, Pinky, Inky, Clyde) con movimiento automático.
+- 👻 **Fantasmas con movimiento automático**: Cuatro tipos de fantasmas (Blinky, Pinky, Inky, Clyde) que se mueven de forma autónoma.
 - 🔵 **Puntos coleccionables**: Dots que aumentan el puntaje al ser comidos.
 - 🏆 **Condiciones de juego**: Victoria al comer todos los puntos, derrota al ser atrapado por un fantasma.
 - 🖥️ **Interfaz gráfica**: Desarrollada con Java Swing, sencilla y modular.
@@ -107,7 +107,7 @@ Este proyecto utiliza GitHub Actions para automatizar la integración, prueba y 
 1. ✅ Checkout del repositorio
 2. ☕ Configuración de JDK 17 con cache de Maven
 3. 🔨 Build con Maven (`mvn clean install -DskipTests`)
-4. 🧪 Ejecución de pruebas (`xvfb-run mvn test`)
+4. 🧪 Ejecución de pruebas (`xvfb-run mvn test`) - *usa xvfb para ejecutar pruebas de UI en entorno headless*
 5. 📊 Generación de informe de cobertura JaCoCo
 6. 📤 Subida del reporte de cobertura como artefacto
 7. 🧹 Limpieza de archivos temporales
@@ -131,8 +131,6 @@ Este proyecto utiliza GitHub Actions para automatizar la integración, prueba y 
 7. 🔗 Notificación de la URL de despliegue
 
 ## Cobertura de Tests
-
-![Coverage Badge](https://img.shields.io/badge/coverage-99%25-brightgreen)
 
 | Métrica | Cobertura |
 |---------|-----------|
