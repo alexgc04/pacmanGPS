@@ -1,7 +1,12 @@
 package pacman;
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.AlphaComposite;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.event.KeyEvent;
 
 public class Pacman {
     private int x, y;
@@ -13,6 +18,8 @@ public class Pacman {
     private static final int STEP = 4;
     private static final int MAX_HALF_HEARTS = 10;
     private static final int GOLD_SHIELD_HALF_HEARTS = 4;
+    private static final long INVINCIBILITY_DURATION_MS = 1500;
+    private long lastCollisionTimeMs = -INVINCIBILITY_DURATION_MS;
 
     public Pacman(int x, int y) {
         this.x = x;
@@ -20,8 +27,13 @@ public class Pacman {
     }
 
     public void draw(Graphics g) {
-        g.setColor(Color.YELLOW);
-        g.fillArc(x, y, SIZE, SIZE, direction.getAngle(), 300);
+        Graphics2D g2d = (Graphics2D) g.create();
+        if (isInvincible()) {
+            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
+        }
+        g2d.setColor(Color.YELLOW);
+        g2d.fillArc(x, y, SIZE, SIZE, direction.getAngle(), 300);
+        g2d.dispose();
     }
 
     public void move() {
@@ -72,6 +84,15 @@ public class Pacman {
         }
     }
 
+    public boolean applyCollisionDamage(int damageHalfHearts) {
+        if (isInvincible() || damageHalfHearts <= 0) {
+            return false;
+        }
+        applyDamage(damageHalfHearts);
+        lastCollisionTimeMs = System.currentTimeMillis();
+        return true;
+    }
+
     public void applyDamage(int damageHalfHearts) {
         int remaining = damageHalfHearts;
         if (shieldHalfHearts > 0) {
@@ -82,6 +103,10 @@ public class Pacman {
         if (remaining > 0) {
             halfHearts = Math.max(0, halfHearts - remaining);
         }
+    }
+
+    public boolean isInvincible() {
+        return System.currentTimeMillis() - lastCollisionTimeMs < INVINCIBILITY_DURATION_MS;
     }
 
     public boolean isDead() {

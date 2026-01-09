@@ -38,7 +38,7 @@ public class Board extends JPanel implements ActionListener {
     };
     private static final int ROWS = MAP_TEMPLATE.length;
     private static final int COLS = MAP_TEMPLATE[0].length();
-    private static final int HUD_BASELINE_OFFSET_PIXELS = 5; // lift score text slightly above the last tile row
+    private static final int HUD_BASELINE_OFFSET_PIXELS = -20; // place HUD below the map area for better visibility
     private static final int HUD_MIN_Y = 15; // minimum padding from the top when the panel is very small
     private static final int HUD_BOTTOM_MARGIN = 10; // keep HUD from sticking to the bottom edge when clamping
     private static final int BOARD_WIDTH = COLS * TILE_SIZE;
@@ -124,7 +124,7 @@ public class Board extends JPanel implements ActionListener {
         for (Ghost ghost : ghosts) {
             ghost.move();
             if (intersects(pacman.getBounds(), ghost.getBounds())) {
-                pacman.applyDamage(ghost.getDamageHalfHearts());
+                pacman.applyCollisionDamage(ghost.getDamageHalfHearts());
             }
         }
         if (pacman.isDead()) {

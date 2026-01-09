@@ -7,6 +7,7 @@ import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.lang.reflect.Field;
 import static org.junit.jupiter.api.Assertions.*;
 import static java.awt.event.KeyEvent.*;
 
@@ -53,6 +54,31 @@ class PacmanTest {
         pacman.applyDamage(3);
         assertEquals(7, pacman.getHalfHearts());
         assertFalse(pacman.isDead());
+    }
+
+    @Test
+    void testCollisionDamageTriggersInvincibility() {
+        assertTrue(pacman.applyCollisionDamage(2));
+        int afterFirstHit = pacman.getHalfHearts();
+        assertFalse(pacman.applyCollisionDamage(2), "Second hit during invincibility should be ignored");
+        assertEquals(afterFirstHit, pacman.getHalfHearts());
+        assertTrue(pacman.isInvincible());
+    }
+
+    @Test
+    void testInvincibilityExpiresAndDamageApplies() throws Exception {
+        pacman.applyCollisionDamage(2);
+        Field lastCollisionField = Pacman.class.getDeclaredField("lastCollisionTimeMs");
+        Field durationField = Pacman.class.getDeclaredField("INVINCIBILITY_DURATION_MS");
+        lastCollisionField.setAccessible(true);
+        durationField.setAccessible(true);
+
+        long duration = durationField.getLong(null);
+        lastCollisionField.setLong(pacman, System.currentTimeMillis() - duration - 1);
+
+        int beforeSecondHit = pacman.getHalfHearts();
+        assertTrue(pacman.applyCollisionDamage(2));
+        assertEquals(beforeSecondHit - 2, pacman.getHalfHearts());
     }
 
     @Test

@@ -180,6 +180,7 @@ class BoardTest {
         int boardWidth = Board.getMapWidth();
         board.setSize(boardWidth, boardHeight);
 
+        assertTrue(Board.getHudTargetY() >= Board.getMapHeight(), "HUD should target an area below the map tiles");
         int computedHudY = Board.calculateHudY(board.getHeight());
         assertTrue(computedHudY >= 0, "HUD Y should not be negative");
         assertTrue(computedHudY <= board.getHeight() - Board.getHudBottomMargin(), "HUD Y should respect the bottom margin");
