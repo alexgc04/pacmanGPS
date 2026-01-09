@@ -1,5 +1,8 @@
 # PacmanProject
 
+## Enlace a la landing page
+https://alexgc04.github.io/pacmanGPS/
+
 Juego básico de Pac-Man desarrollado en Java utilizando Swing para la interfaz gráfica.
 
 ## Badges
