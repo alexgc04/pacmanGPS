@@ -14,6 +14,7 @@ class PacmanTest {
 
     private Pacman pacman;
     private Board board;
+    private static final long INVINCIBILITY_EXPIRED_OFFSET_MS = 2000L;
 
     @BeforeEach
     void setUp() {
@@ -65,9 +66,9 @@ class PacmanTest {
     }
 
     @Test
-    void testInvincibilityExpiresAndDamageApplies() throws Exception {
+    void testInvincibilityExpiresAndDamageApplies() {
         pacman.applyCollisionDamage(2);
-        pacman.setLastCollisionTimeMsForTest(System.currentTimeMillis() - 2000);
+        pacman.setLastCollisionTimeMsForTest(System.currentTimeMillis() - INVINCIBILITY_EXPIRED_OFFSET_MS);
 
         int beforeSecondHit = pacman.getHalfHearts();
         assertTrue(pacman.applyCollisionDamage(2));

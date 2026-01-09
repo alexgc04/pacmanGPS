@@ -20,7 +20,7 @@ public class Pacman {
     private static final int GOLD_SHIELD_HALF_HEARTS = 4;
     private static final long INVINCIBILITY_DURATION_MS = 1500;
     private static final float INVINCIBILITY_ALPHA = 0.5f;
-    private long lastCollisionTimeMs = -INVINCIBILITY_DURATION_MS;
+    private long lastCollisionTimeMs = -INVINCIBILITY_DURATION_MS; // start non-invincible
 
     public Pacman(int x, int y) {
         this.x = x;
