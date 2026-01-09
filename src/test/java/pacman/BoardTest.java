@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class BoardTest {
 
     private Board board;
+    private static final int SMALL_PANEL_HEIGHT_TEST = 20;
 
     @BeforeEach
     void setUp() {
@@ -171,6 +172,21 @@ class BoardTest {
         // X within bounds should not change
         int result = Board.wrapXIfAllowed(200, 180, 20);
         assertEquals(200, result);
+    }
+
+    @Test
+    void testHudTextDrawnWithinBoardArea() throws Exception {
+        int boardHeight = Board.getMapHeight();
+        int boardWidth = Board.getMapWidth();
+        board.setSize(boardWidth, boardHeight);
+
+        int computedHudY = Board.calculateHudY(board.getHeight());
+        assertTrue(computedHudY >= 0, "HUD Y should not be negative");
+        assertTrue(computedHudY <= board.getHeight() - Board.getHudBottomMargin(), "HUD Y should respect the bottom margin");
+
+        int compressedHudY = Board.calculateHudY(SMALL_PANEL_HEIGHT_TEST); // Simulate a very small panel height
+        assertTrue(compressedHudY >= 0, "HUD Y should remain visible even on small panels");
+        assertTrue(compressedHudY <= Math.max(0, SMALL_PANEL_HEIGHT_TEST - Board.getHudBottomMargin()), "HUD Y should clamp within the available space");
     }
 
     @Test
