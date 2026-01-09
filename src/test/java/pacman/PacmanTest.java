@@ -7,7 +7,6 @@ import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-import java.lang.reflect.Field;
 import static org.junit.jupiter.api.Assertions.*;
 import static java.awt.event.KeyEvent.*;
 
@@ -68,13 +67,7 @@ class PacmanTest {
     @Test
     void testInvincibilityExpiresAndDamageApplies() throws Exception {
         pacman.applyCollisionDamage(2);
-        Field lastCollisionField = Pacman.class.getDeclaredField("lastCollisionTimeMs");
-        Field durationField = Pacman.class.getDeclaredField("INVINCIBILITY_DURATION_MS");
-        lastCollisionField.setAccessible(true);
-        durationField.setAccessible(true);
-
-        long duration = durationField.getLong(null);
-        lastCollisionField.setLong(pacman, System.currentTimeMillis() - duration - 1);
+        pacman.setLastCollisionTimeMsForTest(System.currentTimeMillis() - 2000);
 
         int beforeSecondHit = pacman.getHalfHearts();
         assertTrue(pacman.applyCollisionDamage(2));

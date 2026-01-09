@@ -19,6 +19,7 @@ public class Pacman {
     private static final int MAX_HALF_HEARTS = 10;
     private static final int GOLD_SHIELD_HALF_HEARTS = 4;
     private static final long INVINCIBILITY_DURATION_MS = 1500;
+    private static final float INVINCIBILITY_ALPHA = 0.5f;
     private long lastCollisionTimeMs = -INVINCIBILITY_DURATION_MS;
 
     public Pacman(int x, int y) {
@@ -29,7 +30,7 @@ public class Pacman {
     public void draw(Graphics g) {
         Graphics2D g2d = (Graphics2D) g.create();
         if (isInvincible()) {
-            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
+            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, INVINCIBILITY_ALPHA));
         }
         g2d.setColor(Color.YELLOW);
         g2d.fillArc(x, y, SIZE, SIZE, direction.getAngle(), 300);
@@ -107,6 +108,11 @@ public class Pacman {
 
     public boolean isInvincible() {
         return System.currentTimeMillis() - lastCollisionTimeMs < INVINCIBILITY_DURATION_MS;
+    }
+
+    /** Package-private for tests. */
+    void setLastCollisionTimeMsForTest(long timestampMs) {
+        this.lastCollisionTimeMs = timestampMs;
     }
 
     public boolean isDead() {
