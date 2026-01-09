@@ -174,6 +174,20 @@ class BoardTest {
     }
 
     @Test
+    void testHudTextDrawnWithinBoardArea() throws Exception {
+        Field hudYField = Board.class.getDeclaredField("HUD_TEXT_Y");
+        hudYField.setAccessible(true);
+        int hudY = hudYField.getInt(null);
+
+        Field mapField = Board.class.getDeclaredField("MAP");
+        mapField.setAccessible(true);
+        char[][] map = (char[][]) mapField.get(null);
+
+        int boardHeight = map.length * Board.TILE_SIZE;
+        assertTrue(hudY < boardHeight, "HUD text should render inside the board height");
+    }
+
+    @Test
     void testWrapXWithDifferentSizes() {
         // Different entity sizes
         int result = Board.wrapXIfAllowed(-10, 180, 10);

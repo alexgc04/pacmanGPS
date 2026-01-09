@@ -38,6 +38,7 @@ public class Board extends JPanel implements ActionListener {
     };
     private static final int ROWS = MAP_TEMPLATE.length;
     private static final int COLS = MAP_TEMPLATE[0].length();
+    private static final int HUD_TEXT_Y = ROWS * TILE_SIZE - 5;
     private static final int BOARD_WIDTH = COLS * TILE_SIZE;
     private static final char[][] MAP = new char[ROWS][COLS];
     private Timer timer;
@@ -106,9 +107,10 @@ public class Board extends JPanel implements ActionListener {
                 }
             }
         }
+        int hudY = Math.max(15, Math.min(HUD_TEXT_Y, getHeight() - 10));
         g.setColor(Color.YELLOW);
-        g.drawString("Score: " + pacman.getScore(), 10, 410);
-        drawLives(g);
+        g.drawString("Score: " + pacman.getScore(), 10, hudY);
+        drawLives(g, hudY);
     }
 
     @Override
@@ -158,9 +160,9 @@ public class Board extends JPanel implements ActionListener {
         ensureGoldSpawnIfEligible();
     }
 
-    private void drawLives(Graphics g) {
+    private void drawLives(Graphics g, int hudY) {
         int startX = HUD_LIVES_START_X;
-        int y = 410;
+        int y = hudY;
         g.setColor(Color.WHITE);
         g.drawString("Lives:", startX, y);
         int hearts = pacman.getHalfHearts() / HALF_HEARTS_PER_HEART;
