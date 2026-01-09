@@ -1,0 +1,167 @@
+name: CD - Deploy to GitHub Pages
+
+on:
+  workflow_run:
+    workflows: ["CI/CT"]
+    types:
+      - completed
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build JAR with Maven
+        run: mvn clean package -DskipTests
+
+      - name: Create landing page
+        run: |
+          mkdir -p dist
+          cp target/*.jar dist/ 2>/dev/null || echo "No JAR files found in target/"
+          JAR_FILE=$(find dist -name '*.jar' -type f | head -1 | xargs basename 2>/dev/null || echo "pacman-gps-1.0-SNAPSHOT.jar")
+          CURRENT_DATE=$(date +%Y-%m-%d)
+          cat > dist/index.html << LANDING_EOF
+          <!DOCTYPE html>
+          <html lang="es">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>PacMan GPS - Descargar</title>
+              <style>
+                  * {
+                      margin: 0;
+                      padding: 0;
+                      box-sizing: border-box;
+                  }
+                  body {
+                      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+                      min-height: 100vh;
+                      display: flex;
+                      justify-content: center;
+                      align-items: center;
+                      color: #fff;
+                  }
+                  .container {
+                      text-align: center;
+                      padding: 40px;
+                      background: rgba(255, 255, 255, 0.1);
+                      border-radius: 20px;
+                      backdrop-filter: blur(10px);
+                      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+                      max-width: 500px;
+                      width: 90%;
+                  }
+                  h1 {
+                      font-size: 2.5rem;
+                      margin-bottom: 10px;
+                      color: #ffeb3b;
+                      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+                  }
+                  .pacman-icon {
+                      font-size: 4rem;
+                      margin-bottom: 20px;
+                  }
+                  p {
+                      font-size: 1.1rem;
+                      margin-bottom: 30px;
+                      color: #e0e0e0;
+                  }
+                  .download-btn {
+                      display: inline-block;
+                      padding: 15px 40px;
+                      font-size: 1.2rem;
+                      color: #1a1a2e;
+                      background: linear-gradient(135deg, #ffeb3b 0%, #ffc107 100%);
+                      border: none;
+                      border-radius: 50px;
+                      text-decoration: none;
+                      font-weight: bold;
+                      transition: all 0.3s ease;
+                      box-shadow: 0 4px 15px rgba(255, 235, 59, 0.4);
+                  }
+                  .download-btn:hover {
+                      transform: translateY(-3px);
+                      box-shadow: 0 6px 20px rgba(255, 235, 59, 0.6);
+                  }
+                  .info {
+                      margin-top: 30px;
+                      font-size: 0.9rem;
+                      color: #b0b0b0;
+                  }
+                  .requirements {
+                      margin-top: 20px;
+                      padding: 15px;
+                      background: rgba(0, 0, 0, 0.2);
+                      border-radius: 10px;
+                      font-size: 0.85rem;
+                  }
+                  .requirements h3 {
+                      color: #ffeb3b;
+                      margin-bottom: 10px;
+                  }
+              </style>
+          </head>
+          <body>
+              <div class="container">
+                  <div class="pacman-icon">🎮</div>
+                  <h1>PacMan GPS</h1>
+                  <p>¡Descarga el clásico juego de PacMan y diviértete!</p>
+                  <a href="$JAR_FILE" class="download-btn" download>⬇️ Descargar JAR</a>
+                  <div class="requirements">
+                      <h3>Requisitos</h3>
+                      <p>Java 17 o superior</p>
+                      <p>Ejecutar: <code>java -jar $JAR_FILE</code></p>
+                  </div>
+                  <div class="info">
+                      <p>Versión: 1.0-SNAPSHOT</p>
+                      <p>Última actualización: $CURRENT_DATE</p>
+                  </div>
+              </div>
+          </body>
+          </html>
+          LANDING_EOF
+
+      - name: Upload artifact for GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Notify deployment URL
+        run: |
+          echo "✅ Deployment successful!"
+          echo "🌐 URL: ${{ steps.deployment.outputs.page_url }}"

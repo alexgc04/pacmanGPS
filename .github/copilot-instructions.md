@@ -55,7 +55,7 @@ page en GitHub Pages.
 - El workflow debe ejecutarse después de que **`ci-ct` ha finalizado con éxito**.
 - Solo se despliega desde la rama `main`.
 ### Workflow implementado
-- Nombre del archivo: `.github/workflows/deploy-pages.yml`
+- Nombre del archivo: `.github/workflows/cd.yml`
 - **Job Build**:
  - Configura Java 17 y Maven
  - Ejecuta `mvn clean package -DskipTests`
